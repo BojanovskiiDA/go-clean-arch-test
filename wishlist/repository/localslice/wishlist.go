@@ -18,7 +18,7 @@ type WishLocalSlice struct {
 }
 
 func NewWishLocalSlice() *WishLocalSlice {
-	return &WishLocalSlice{Wishlist: make([]*Wish, 10),
+	return &WishLocalSlice{Wishlist: make([]*Wish,0),
 		Mutex: new(sync.Mutex),
 	}
 }
@@ -41,7 +41,7 @@ func (w *WishLocalSlice) GetAllWishes(ctx context.Context) (gwl []*models.Wish, 
 	return gwl, err
 }
 
-func (w *WishLocalSlice) DeleteWish(ctx context.Context, gw *models.Wish) error {
+func (w *WishLocalSlice) DeleteWishByID(ctx context.Context, gw *models.Wish) error {
 	_, id, _ := toLocalWish(gw)
 	w.Mutex.Lock()
 	for i := range w.Wishlist {
@@ -54,16 +54,20 @@ func (w *WishLocalSlice) DeleteWish(ctx context.Context, gw *models.Wish) error 
 	return nil
 }
 
-func toGlobalWish(lw* Wish, id int) (gb *models.Wish){
-	gb.ID = strconv.Itoa(id)
-	gb.WishText = lw.WishText
-	gb.WishTitle = lw.WishTitle
-	return gb
+func toGlobalWish(lw *Wish, id int) *models.Wish{
+	return &models.Wish{
+		ID: strconv.Itoa(id),
+		WishTitle: lw.WishTitle,
+		WishText: lw.WishText,
+	}
 }
 
 func toLocalWish(gb *models.Wish) (lw *Wish, id int, err error){
-	lw.WishText = gb.WishText
-	lw.WishTitle = gb.WishTitle
+	out := &Wish{
+	 	WishTitle: gb.WishTitle,
+		WishText: gb.WishText,
+	}
+	lw = out
 	id, err = strconv.Atoi(gb.ID)
 	if err != nil {
 		return lw, 0, err
