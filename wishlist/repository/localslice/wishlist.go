@@ -2,7 +2,7 @@ package localslice
 
 import (
 	"context"
-	"go-clean-arch-test/go-clean-arch-test/models"
+	"go-clean-arch-test/models"
 	"strconv"
 	"sync"
 )

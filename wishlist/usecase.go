@@ -2,7 +2,7 @@ package wishlist
 
 import (
 	"context"
-	"go-clean-arch-test/go-clean-arch-test/models"
+	"go-clean-arch-test/models"
 )
 
 type UseCase interface {
