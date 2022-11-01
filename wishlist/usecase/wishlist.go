@@ -4,7 +4,6 @@ import (
 	"context"
 	"go-clean-arch-test/models"
 	"go-clean-arch-test/wishlist"
-	"strconv"
 )
 type WishListUseCase struct {
 	WishlistRepository wishlist.Repository
@@ -31,9 +30,9 @@ func (wluc *WishListUseCase) GetAllWishes(ctx context.Context) ([]*models.Wish, 
 	return wluc.WishlistRepository.GetAllWishes(ctx)
 }
 
-func (wluc *WishListUseCase) DeleteWishByID(ctx context.Context, id int) error {
+func (wluc *WishListUseCase) DeleteWishByID(ctx context.Context, id string) error {
 	wish := &models.Wish{
-		ID: strconv.Itoa(id),
+		ID: id,
 	}
 	return wluc.WishlistRepository.DeleteWishByID(ctx, wish)
 }
