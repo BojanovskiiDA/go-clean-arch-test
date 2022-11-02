@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"go-clean-arch-test/config"
 	"go-clean-arch-test/wishlist"
 	"go-clean-arch-test/wishlist/repository/localslice"
