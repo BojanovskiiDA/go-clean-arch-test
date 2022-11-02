@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"go-clean-arch-test/config"
 	"go-clean-arch-test/wishlist"
 	"go-clean-arch-test/wishlist/repository/localslice"
 	"go-clean-arch-test/wishlist/transport"
@@ -10,9 +12,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 type App struct {
@@ -20,7 +24,7 @@ type App struct {
 	wishListUC wishlist.UseCase
 }
 
-func NewApp() *App{
+func NewApp() *App {
 	wishRepo := localslice.NewWishLocalSlice()
 	wishUC := usecase.NewUseCase(wishRepo)
 
@@ -29,16 +33,25 @@ func NewApp() *App{
 	}
 }
 
-func (a *App) Run(port string) error{
+func (a *App) Run() error {
+	err := config.Init()
+	if err != nil {
+		log.Fatalf("%s", err)
+	}
+	settings := viper.AllSettings()
+	port, ok := settings["port"].(int)
+	if !ok {
+		log.Fatal("Port is not found")
+	}
 	router := gin.Default()
 	transport.RegisterWishListEndpoints(router, a.wishListUC)
 	a.httpServer = &http.Server{
-		Addr: ":" + port,
-		Handler: router,
-		ReadTimeout: 10* time.Second,
-		WriteTimeout: 10* time.Second,
+		Addr:         ":"+ strconv.Itoa(port),
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
-	
+
 	go func() {
 		if err := a.httpServer.ListenAndServe(); err != nil {
 			log.Fatalf("Failed to listen and serve: %+v", err)
