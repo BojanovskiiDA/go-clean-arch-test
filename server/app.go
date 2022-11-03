@@ -2,9 +2,11 @@ package server
 
 import (
 	"context"
-	"go-clean-arch-test/config"
+	"database/sql"
+	"fmt"
 	"go-clean-arch-test/wishlist"
-	"go-clean-arch-test/wishlist/repository/localslice"
+	//"go-clean-arch-test/wishlist/repository/localslice"
+	"go-clean-arch-test/wishlist/repository/postgre"
 	"go-clean-arch-test/wishlist/transport"
 	"go-clean-arch-test/wishlist/usecase"
 	"log"
@@ -23,20 +25,21 @@ type App struct {
 	wishListUC wishlist.UseCase
 }
 
-func NewApp() *App {
-	wishRepo := localslice.NewWishLocalSlice()
+func NewApp() (*App, error) {
+	db, err := initPGDB()
+	if err != nil {
+		return nil, err
+	}
+	wishRepo := postgre.NewWishPG(db)
 	wishUC := usecase.NewUseCase(wishRepo)
 
 	return &App{
 		wishListUC: wishUC,
-	}
+	}, nil
 }
 
 func (a *App) Run() error {
-	err := config.Init()
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
+
 	settings := viper.AllSettings()
 	port, ok := settings["port"].(int)
 	if !ok {
@@ -66,4 +69,19 @@ func (a *App) Run() error {
 	defer shutdown()
 
 	return a.httpServer.Shutdown(ctx)
+}
+
+func initPGDB() (*sql.DB, error){
+	host:= viper.GetString("postgre.host")
+	port:= viper.GetString("postgre.port")
+	user:= viper.GetString("postgre.user")
+	pswd:= viper.GetString("postgre.pswd")
+	dbname:= viper.GetString("postgre.bdname")
+	conStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",host, port, user, pswd, dbname) 
+	log.Println(conStr)
+	db, err := sql.Open("postgres", conStr)
+	if err!=nil {
+		return nil, err
+	}
+	return db, nil
 }

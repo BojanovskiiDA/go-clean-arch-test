@@ -3,6 +3,7 @@ package transport
 import (
 	"go-clean-arch-test/models"
 	"go-clean-arch-test/wishlist"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,7 @@ func (h *Handler) CreateWish(c *gin.Context) {
 		return
 	}
 	if err:= h.useCase.CreateWish(c,input.Text,input.Title); err != nil{
+		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -43,6 +45,7 @@ type GetAllWishesOut struct{
 func (h *Handler) GetAllWishes(c *gin.Context) {
 	wishes, err := h.useCase.GetAllWishes(c)
 	if err != nil{
+		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -56,6 +59,7 @@ type DeleteWishByIDInput struct{
 func (h *Handler) DeleteWishByID(c *gin.Context) {
 	input:= new(DeleteWishByIDInput)
 	if err := c.BindJSON(input); err != nil {
+		log.Println(err)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}

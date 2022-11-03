@@ -1,7 +1,8 @@
 port: 8080
 
 postgre:
-  uri: ""
-  bdname: ""
-  user: ""
-  pswd: ""
+  host:   "localhost"
+  port:   "5432"
+  bdname: "myDB"
+  user:   "myLogin"
+  pswd:   "myPassword"
