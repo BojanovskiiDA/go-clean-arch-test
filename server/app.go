@@ -78,7 +78,7 @@ func initPGDB() (*sql.DB, error){
 	pswd:= viper.GetString("postgre.pswd")
 	dbname:= viper.GetString("postgre.bdname")
 	conStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",host, port, user, pswd, dbname) 
-	log.Println(conStr)
+
 	db, err := sql.Open("postgres", conStr)
 	if err!=nil {
 		return nil, err
