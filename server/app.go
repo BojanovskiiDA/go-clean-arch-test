@@ -83,5 +83,11 @@ func initPGDB() (*sql.DB, error){
 	if err!=nil {
 		return nil, err
 	}
+	db.SetMaxOpenConns(10)
+	
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
 	return db, nil
 }
