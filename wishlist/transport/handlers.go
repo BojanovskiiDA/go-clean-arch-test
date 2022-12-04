@@ -30,7 +30,7 @@ func (h *Handler) CreateWish(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	if err:= h.useCase.CreateWish(c,input.Text,input.Title); err != nil{
+	if err:= h.useCase.CreateWish(c,input.Title,input.Text); err != nil{
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

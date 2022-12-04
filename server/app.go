@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"go-clean-arch-test/wishlist"
+
 	//"go-clean-arch-test/wishlist/repository/localslice"
-	"go-clean-arch-test/wishlist/repository/postgre"
+	"go-clean-arch-test/wishlist/repository/memcache"
+	//"go-clean-arch-test/wishlist/repository/postgre"
 	"go-clean-arch-test/wishlist/transport"
 	"go-clean-arch-test/wishlist/usecase"
 	"log"
@@ -26,16 +28,23 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
-	db, err := initPGDB()
+	// db, err := initPGDB()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//wishRepo := postgre.NewWishPG(db)
+	
+	//need to remake for config file
+	wishRepo := memcache.NewWishMemCache("127.0.0.1:49153")
+	err := wishRepo.MCClient.Ping()
 	if err != nil {
 		return nil, err
 	}
-	wishRepo := postgre.NewWishPG(db)
 	wishUC := usecase.NewUseCase(wishRepo)
 
 	return &App{
 		wishListUC: wishUC,
-	}, nil
+	}, err
 }
 
 func (a *App) Run() error {
