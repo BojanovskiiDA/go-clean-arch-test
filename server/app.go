@@ -7,7 +7,9 @@ import (
 	"go-clean-arch-test/wishlist"
 
 	//"go-clean-arch-test/wishlist/repository/localslice"
-	"go-clean-arch-test/wishlist/repository/memcache"
+	//"go-clean-arch-test/wishlist/repository/memcache"
+	"go-clean-arch-test/wishlist/repository/redisrepo"
+
 	//"go-clean-arch-test/wishlist/repository/postgre"
 	"go-clean-arch-test/wishlist/transport"
 	"go-clean-arch-test/wishlist/usecase"
@@ -19,6 +21,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gomodule/redigo/redis"
 	"github.com/spf13/viper"
 )
 
@@ -35,11 +38,14 @@ func NewApp() (*App, error) {
 	//wishRepo := postgre.NewWishPG(db)
 	
 	//need to remake for config file
-	wishRepo := memcache.NewWishMemCache("127.0.0.1:49153")
-	err := wishRepo.MCClient.Ping()
+	// wishRepo := memcache.NewWishMemCache("127.0.0.1:49153")
+	// err := wishRepo.MCClient.Ping()
+	rediBase, err := redis.DialURL("redis://default:redispw@localhost:49153")
 	if err != nil {
 		return nil, err
 	}
+	wishRepo := redisrepo.NewWishRedis(rediBase)
+
 	wishUC := usecase.NewUseCase(wishRepo)
 
 	return &App{

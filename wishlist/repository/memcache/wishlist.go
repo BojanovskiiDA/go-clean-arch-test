@@ -91,7 +91,7 @@ func (wmc *WishMemCache) GetAllWishes(ctx context.Context) ([]*models.Wish, erro
 func (wmc *WishMemCache) DeleteWishByID(ctx context.Context, wish *models.Wish) error {
 	//need delete key from AllKeys
 	return wmc.MCClient.Delete(wish.ID)	
-	
+
 }
 
 func modelToMC(wish *models.Wish) mcModelWish {
