@@ -20,7 +20,7 @@ func NewWishPG(db *sql.DB) *WishPG {
 }
 
 func (wpg *WishPG) CreateWish(ctx context.Context, wish *models.Wish) error {
-	_, err := wpg.DB.Exec("INSERT INTO wishes (title, text) VALUES ($1, $2)", wish.WishText, wish.WishTitle)
+	_, err := wpg.DB.Exec("INSERT INTO wishes (title, text) VALUES ($1, $2)", wish.WishTitle, wish.WishText)
 	return err
 }
 
