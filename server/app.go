@@ -23,6 +23,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
 	"github.com/spf13/viper"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type App struct {
@@ -35,7 +37,7 @@ func NewApp() (*App, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
-	//wishRepo := postgre.NewWishPG(db)
+	// wishRepo := postgre.NewWishPG(db)
 	
 	//need to remake for config file
 	// wishRepo := memcache.NewWishMemCache("127.0.0.1:49153")
@@ -62,6 +64,9 @@ func (a *App) Run() error {
 	}
 	router := gin.Default()
 	transport.RegisterWishListEndpoints(router, a.wishListUC)
+
+	router.Handle("GET","/metrics", prometheusHandler())
+
 	a.httpServer = &http.Server{
 		Addr:         ":"+ strconv.Itoa(port),
 		Handler:      router,
@@ -76,7 +81,7 @@ func (a *App) Run() error {
 	}()
 
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, os.Interrupt)
+	signal.Notify(quit, os.Interrupt, os.Kill)
 
 	<-quit
 
@@ -105,4 +110,12 @@ func initPGDB() (*sql.DB, error){
 		return nil, err
 	}
 	return db, nil
+}
+
+
+func prometheusHandler() gin.HandlerFunc {
+    h := promhttp.Handler()
+    return func(c *gin.Context) {
+        h.ServeHTTP(c.Writer, c.Request)
+    }
 }
