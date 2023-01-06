@@ -8,11 +8,14 @@ import (
 
 	//"go-clean-arch-test/wishlist/repository/localslice"
 	//"go-clean-arch-test/wishlist/repository/memcache"
-	"go-clean-arch-test/wishlist/repository/redisrepo"
+	"go-clean-arch-test/wishlist/repository/localslice"
+	//"go-clean-arch-test/wishlist/repository/redisrepo"
 
 	//"go-clean-arch-test/wishlist/repository/postgre"
+	metricsTransport "go-clean-arch-test/metrics/transport"
 	"go-clean-arch-test/wishlist/transport"
 	"go-clean-arch-test/wishlist/usecase"
+
 	"log"
 	"net/http"
 	"os"
@@ -21,10 +24,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gomodule/redigo/redis"
+	//"github.com/gomodule/redigo/redis"
 	"github.com/spf13/viper"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type App struct {
@@ -42,17 +43,19 @@ func NewApp() (*App, error) {
 	//need to remake for config file
 	// wishRepo := memcache.NewWishMemCache("127.0.0.1:49153")
 	// err := wishRepo.MCClient.Ping()
-	rediBase, err := redis.DialURL("redis://default:redispw@localhost:49153")
-	if err != nil {
-		return nil, err
-	}
-	wishRepo := redisrepo.NewWishRedis(rediBase)
+	// rediBase, err := redis.DialURL("redis://default:redispw@localhost:49153")
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+
+	wishRepo := localslice.NewWishLocalSlice()
 
 	wishUC := usecase.NewUseCase(wishRepo)
 
 	return &App{
 		wishListUC: wishUC,
-	}, err
+	}, nil
 }
 
 func (a *App) Run() error {
@@ -64,8 +67,7 @@ func (a *App) Run() error {
 	}
 	router := gin.Default()
 	transport.RegisterWishListEndpoints(router, a.wishListUC)
-
-	router.Handle("GET","/metrics", prometheusHandler())
+	metricsTransport.RegisterMetricsEndpoint(router)
 
 	a.httpServer = &http.Server{
 		Addr:         ":"+ strconv.Itoa(port),
@@ -113,9 +115,3 @@ func initPGDB() (*sql.DB, error){
 }
 
 
-func prometheusHandler() gin.HandlerFunc {
-    h := promhttp.Handler()
-    return func(c *gin.Context) {
-        h.ServeHTTP(c.Writer, c.Request)
-    }
-}
